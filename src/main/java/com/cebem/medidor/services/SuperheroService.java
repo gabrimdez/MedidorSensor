@@ -17,11 +17,21 @@ public class SuperheroService {
     }
 
     public Superhero getSuperheroById(String id) {
-        return apiClient.getSuperheroById(id); // ← Esta es la llamada real
+        try {
+            return apiClient.getSuperheroById(id);
+        } catch (Exception e) {
+            e.printStackTrace(); // aparecerá en los logs de Render
+            return null;
+        }
     }
 
     public Superhero getRandomSuperhero() {
-        int randomId = random.nextInt(731) + 1; // IDs válidos entre 1 y 731
-        return apiClient.getSuperheroById(String.valueOf(randomId));
+        try {
+            int randomId = random.nextInt(731) + 1; // IDs válidos entre 1 y 731
+            return apiClient.getSuperheroById(String.valueOf(randomId));
+        } catch (Exception e) {
+            e.printStackTrace(); // para saber el motivo si falla
+            return null;
+        }
     }
 }
