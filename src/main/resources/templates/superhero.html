@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="'Superhéroe: ' + ${hero.name}">Superhero Info</title>
+    <style>
+        :root {
+            --primary: #00ffe7;
+            --accent: #ffa600;
+            --background: #121212;
+            --card-bg: #1e1e1e;
+            --text: #f0f0f0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 960px;
+            margin: auto;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: scale(1.01);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
+        }
+
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .header img {
+            max-width: 200px;
+            border-radius: 15px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2.5rem;
+        }
+
+        h3 {
+            margin-top: 30px;
+            margin-bottom: 10px;
+            color: var(--accent);
+            font-size: 1.6rem;
+        }
+
+        ul {
+            list-style: none;
+            margin-top: 10px;
+        }
+
+        li {
+            margin-bottom: 8px;
+            font-size: 1.05rem;
+        }
+
+        span {
+            font-weight: 600;
+        }
+
+        .back-button {
+            display: inline-block;
+            margin-top: 40px;
+            text-decoration: none;
+            color: var(--text);
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: var(--primary);
+            color: #000;
+            box-shadow: 0 0 10px var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .chart-container {
+            margin-top: 40px;
+        }
+
+        @media (max-width: 640px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header img {
+                width: 100%;
+                height: auto;
+            }
+
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <!-- Header con imagen y nombre -->
+            <div class="header">
+                <div>
+                    <h1 th:text="${hero.name}">Superhero Name</h1>
+                </div>
+                <div th:if="${hero.image != null}">
+                    <img th:src="${hero.image.url}" alt="Superhero Image" />
+                </div>
+            </div>
+
+            <!-- Power Stats -->
+            <div class="stats" th:if="${hero.powerStats != null}">
+                <h3>Power Stats</h3>
+                <ul>
+                    <li>Intelligence: <span th:text="${hero.powerStats.intelligence}"></span></li>
+                    <li>Strength: <span th:text="${hero.powerStats.strength}"></span></li>
+                    <li>Speed: <span th:text="${hero.powerStats.speed}"></span></li>
+                    <li>Durability: <span th:text="${hero.powerStats.durability}"></span></li>
+                    <li>Power: <span th:text="${hero.powerStats.power}"></span></li>
+                    <li>Combat: <span th:text="${hero.powerStats.combat}"></span></li>
+                </ul>
+            </div>
+
+            <!-- Biografía -->
+            <div class="bio" th:if="${hero.biography != null}">
+                <h3>Biography</h3>
+                <ul>
+                    <li>Full Name: <span th:text="${hero.biography.fullName}"></span></li>
+                    <li>Alter Egos: <span th:text="${hero.biography.alterEgos}"></span></li>
+                    <li>First Appearance: <span th:text="${hero.biography.firstAppearance}"></span></li>
+                    <li>Place of Birth: <span th:text="${hero.biography.placeOfBirth}"></span></li>
+                    <li>Publisher: <span th:text="${hero.biography.publisher}"></span></li>
+                    <li>Alignment: <span th:text="${hero.biography.alignment}"></span></li>
+                </ul>
+            </div>
+
+            <!-- Gráfico -->
+            <div class="chart-container">
+                <h3>Power Stats Chart</h3>
+                <canvas id="statsChart" width="400" height="300"></canvas>
+            </div>
+
+            <!-- Botón único de recarga -->
+            <a href="/superhero" class="back-button">🎲 New Superhero</a>
+
+        </div>
+    </div>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const stats = {
+            intelligence: /*[[${hero.powerStats.intelligence}]]*/ 0,
+            strength: /*[[${hero.powerStats.strength}]]*/ 0,
+            speed: /*[[${hero.powerStats.speed}]]*/ 0,
+            durability: /*[[${hero.powerStats.durability}]]*/ 0,
+            power: /*[[${hero.powerStats.power}]]*/ 0,
+            combat: /*[[${hero.powerStats.combat}]]*/ 0
+        };
+
+        const ctx = document.getElementById('statsChart').getContext('2d');
+        const statsChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(stats),
+                datasets: [{
+                    label: 'Power Level',
+                    data: Object.values(stats),
+                    backgroundColor: '#00ffe7',
+                    borderColor: '#fff',
+                    borderWidth: 1,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        grid: { color: '#444' },
+                        ticks: { color: '#ccc' }
+                    },
+                    x: {
+                        grid: { color: '#444' },
+                        ticks: { color: '#ccc' }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#fff'
+                        }
+                    }
+                }
+            }
+        });
+        /*]]>*/
+    </script>
+
+</body>
+
+</html>
